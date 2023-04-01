@@ -149,7 +149,7 @@ a {
   font: inherit;
   color: #0a4643;
   cursor: pointer;
-}
+ }
 
 .btn-to-top {
   position: fixed;
@@ -167,8 +167,9 @@ a {
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  font: bold;
+
 }
+
 i {
   border: solid #031514;
   border-width: 0 3px 3px 0;
@@ -182,12 +183,12 @@ i {
 }
 
 .btn-to-top--visible {
-  opacity: 1;
+  opacity: 0.7;
   visibility: visible;
 }
 
 .btn-load-more:hover,
 .btn-to-top:hover {
   background-color:#328b86;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
