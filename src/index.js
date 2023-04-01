@@ -1,47 +1,99 @@
+"use strict"
 import './css/styles.css';
-import { fetchCountry } from './api-country.js';
+import { fetchPhotos } from './api-pixabay.js';
+import createGalleryCards from './templates/gallery-card.hbs';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import debounce from 'lodash.debounce';
-import { countryListMarkup } from './templates/country-list.js';
-import { countryBlankMarkup } from './templates/country-blank.js';
+import { onScroll, onToTopBtn } from './scroll';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
-const DEBOUNCE_DELAY = 300;
+
+// const fetchPhotos = (query, page) => {
+//     const key = '34813667-33d2158b793f196ed7f761dbf';
+
+//     const BASE_URL = 'https://pixabay.com/api/'
+
+//     return axios.get(`${BASE_URL}?key=${key}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`).then(res => res.data)
+// }
 
 const refs = {
-  searchBox: document.getElementById('search-box'),
-  countryList: document.querySelector('.country-list'),
-  countryInfo: document.querySelector('.country-info'),
-};
-
-refs.searchBox.addEventListener(`input`, debounce(onSearch, DEBOUNCE_DELAY));
-
-function onSearch(e) {
-  // e.preventDefault();
-
-  const searchBoxValue = e.target.value.trim();
-  refs.countryList.innerHTML = '';
-  refs.countryInfo.innerHTML = '';
-  if (!searchBoxValue) return;
-
-  fetchCountry(searchBoxValue)
-    .then(data => {
-      if (data.length === 1) {
-        const markup = data.map(country => countryBlankMarkup(country));
-        refs.countryInfo.innerHTML = markup.join('');
-        refs.countryList.innerHTML = '';
-      }
-
-      if (data.length > 1 && data.length <= 10) {
-        const markup = data.map(country => countryListMarkup(country));
-        refs.countryInfo.innerHTML = markup.join('');
-        refs.countryList.innerHTML = '';
-      }
-
-      if (data.length > 10) {
-        Notify.info(
-          'Too many matches found. Please enter a more specific name.'
-        );
-      }
-    })
-    .catch(error => Notify.failure('Oops, there is no country with that name'));
+    form: document.querySelector('.search-form'),
+    input: document.querySelector('input'),
+    gallery: document.querySelector('.gallery'),
+    loadMoreBtn: document.querySelector('.btn-load-more')
 }
+
+let page = 1;
+let searchQuery = '';
+
+const hideLoadMoreBtn = () => {
+    refs.loadMoreBtn.classList.add('is-hidden');
+}
+
+const showLoadMoreBtn = () => {
+    refs.loadMoreBtn.classList.remove('is-hidden');
+}
+
+const renderImagesList = (evt) => {
+    evt.preventDefault();
+    hideLoadMoreBtn();
+    
+    page = 1;
+
+    refs.gallery.innerHTML = '';
+
+    searchQuery = evt.target.searchQuery.value.trim();
+
+    if (!searchQuery) {
+        Notify.info('Fill the form for searching');
+        return;
+    }
+    
+
+    fetchPhotos(searchQuery, page).then(res => {        
+
+        if (!res.hits[0]) {            
+             Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+            return;
+        }
+
+        refs.gallery.insertAdjacentHTML('beforeend', createGalleryCards(res.hits));
+        Notify.success(`Hooray! We found ${res.totalHits} images.`)
+        
+        const lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionPosition: 'bottom', captionDelay: 300 })
+
+        if (res.hits.length < 40) {
+            return;
+        }        
+        
+        showLoadMoreBtn()       
+    })
+}
+
+const addMoreImages = () => {
+    page += 1;
+
+    fetchPhotos(searchQuery, page).then(res => {        
+        
+        refs.gallery.insertAdjacentHTML('beforeend', createGalleryCards(res.hits));
+
+        const lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionPosition: 'bottom', captionDelay: 250 })
+
+        if (res.totalHits === refs.gallery.childElementCount) {
+            hideLoadMoreBtn();
+            Notify.info('We`re sorry, but you`ve reached the end of search results.')
+            return;
+        }
+
+        showLoadMoreBtn();
+       Notify.success(`Hooray! We found ${totalHits} images.`);
+})
+}
+
+
+refs.form.addEventListener('submit', renderImagesList);
+
+refs.loadMoreBtn.addEventListener('click', addMoreImages);
+
+onScroll();
+onToTopBtn();
