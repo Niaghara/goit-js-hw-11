@@ -47,7 +47,6 @@ const renderImagesList = (evt) => {
              Notify.failure('Sorry, there are no images matching your search query. Please try again.');
             return;
         }
-
         refs.gallery.insertAdjacentHTML('beforeend', createGalleryCards(res.hits));
         Notify.success(`Hooray! We found ${res.totalHits} images.`)
         
@@ -77,7 +76,7 @@ const addMoreImages = () => {
         }
 
         showLoadMoreBtn();
-       Notify.success(`Hooray! We found ${res.totalHits} images.`);
+      //  Notify.success(`Hooray! We found ${res.totalHits} images.`);
 })
 }
 
