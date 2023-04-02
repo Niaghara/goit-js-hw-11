@@ -7,15 +7,6 @@ import { onScroll, onToTopBtn } from './scroll';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-
-// const fetchPhotos = (query, page) => {
-//     const key = '34813667-33d2158b793f196ed7f761dbf';
-
-//     const BASE_URL = 'https://pixabay.com/api/'
-
-//     return axios.get(`${BASE_URL}?key=${key}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`).then(res => res.data)
-// }
-
 const refs = {
     form: document.querySelector('.search-form'),
     input: document.querySelector('input'),
@@ -86,7 +77,7 @@ const addMoreImages = () => {
         }
 
         showLoadMoreBtn();
-       Notify.success(`Hooray! We found ${totalHits} images.`);
+       Notify.success(`Hooray! We found ${res.totalHits} images.`);
 })
 }
 
